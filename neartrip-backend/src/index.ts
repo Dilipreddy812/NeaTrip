@@ -13,5 +13,9 @@ app.get('/', (req, res) => {
   res.send('🛠️ NearTrip API is running!');
 });
 
+const checkinsRouter = require('./routes/checkins');
+app.use('/api/checkins', checkinsRouter);
+
+
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

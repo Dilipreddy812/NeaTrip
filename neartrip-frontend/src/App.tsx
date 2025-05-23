@@ -48,7 +48,7 @@ function App() {
     <div className="min-h-screen bg-gray-100">
       {/* We'll create and use PlacesFeedPage component here later */}
       <header className="bg-white shadow py-4">
-        <h1 className="text-3xl font-bold text-center text-gray-800">NearTrip Places</h1>
+        <h1 className="text-3xl font-bold text-center text-gray-800">NeaTrip</h1>
       </header>
       <main className="container mx-auto p-4 md:p-6">
         <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-6 max-w-xl mx-auto">

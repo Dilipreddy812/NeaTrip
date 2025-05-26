@@ -6,7 +6,12 @@
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
-
+    /* Path Aliases - ADD THESE LINES */
+    "baseUrl": ".", // Sets the base directory for module resolution. "." means this directory.
+    "paths": {
+      "@/*": ["./src/*"] // Maps '@/' to './src/'. Assumes 'src' is at the same level as this tsconfig.app.json
+    },
+    /* End of Path Aliases */
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,

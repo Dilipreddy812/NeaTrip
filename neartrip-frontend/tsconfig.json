@@ -1,7 +1,17 @@
 {
-  "files": [],
+  "files": [], // This is often empty in solution-style tsconfigs
   "references": [
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }
-  ]
+  ],
+  "compilerOptions": { // <-- Add this section
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
+    // You might want to add other common options here if they apply globally
+    // e.g., "esModuleInterop": true, "skipLibCheck": true, "forceConsistentCasingInFileNames": true
+    // However, specific compilation targets and module systems are usually best left
+    // to the referenced projects (tsconfig.app.json, tsconfig.node.json).
+  }
 }

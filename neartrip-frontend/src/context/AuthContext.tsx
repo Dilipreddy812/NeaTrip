@@ -19,13 +19,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const fetchSession = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (error) { // Handled error
+      const { data, error } = await supabase.auth.getSession(); // Modified destructuring
+      if (error) {
         console.error('Error fetching session:', error);
       }
-      if (session) {
-        setSession(session);
-        setUser(session.user);
+      // Check data and data.session explicitly
+      if (data && data.session) {
+        setSession(data.session);
+        setUser(data.session.user);
       }
       setLoading(false);
     };

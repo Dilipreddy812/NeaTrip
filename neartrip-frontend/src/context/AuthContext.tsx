@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabaseClient';
-import type { Session, User } from '@supabase/supabase-js';
+import { supabase } from '../lib/supabaseClient'; // Changed import path
+import type { Session, User, AuthChangeEvent } from '@supabase/supabase-js'; // Added AuthChangeEvent
 
 interface AuthContextType {
   user: User | null;
@@ -20,6 +20,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const fetchSession = async () => {
       const { data: { session }, error } = await supabase.auth.getSession();
+      if (error) { // Handled error
+        console.error('Error fetching session:', error);
+      }
       if (session) {
         setSession(session);
         setUser(session.user);
@@ -29,16 +32,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     fetchSession();
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-    });
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event: AuthChangeEvent, sessionState: Session | null) => { // Added types for _event and sessionState
+        setSession(sessionState);
+        setUser(sessionState?.user ?? null);
+      }
+    );
 
     return () => listener.subscription.unsubscribe();
   }, []);
 
   const signInWithEmail = async (email: string) => {
-    // @ts-ignore
+    // @ts-ignore remains for now as supabaseClient is a placeholder
     await supabase.auth.signInWithOtp({ email });
   };
 

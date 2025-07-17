@@ -1,14 +1,8 @@
 import express from 'express';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '../lib/supabase';
 
 // Create router
 const router = express.Router();
-
-// Supabase client
-const supabase = createClient(
-  process.env.SUPABASE_URL as string,
-  process.env.SUPABASE_SERVICE_ROLE_KEY as string
-);
 
 // Route to fetch all places
 router.get('/', async (req, res) => {

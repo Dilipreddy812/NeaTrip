@@ -1,13 +1,8 @@
 // src/routes/checkins.js
 const express = require('express');
-const { createClient } = require('@supabase/supabase-js');
+const { supabase } = require('../lib/supabase');
 
 const router = express.Router();
-
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
 
 function calculateDistanceMeters(lat1, lon1, lat2, lon2) {
   const toRad = v => (v * Math.PI) / 180;
@@ -20,8 +15,11 @@ function calculateDistanceMeters(lat1, lon1, lat2, lon2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-router.post('/', async (req, res) => {
-  const { user_id, place_id, latitude, longitude, caption } = req.body;
+const { protect } = require('../middleware/auth');
+
+router.post('/', protect, async (req, res) => {
+  const { place_id, latitude, longitude, caption } = req.body;
+  const user_id = req.user.id;
 
   if (!user_id || !place_id || !latitude || !longitude) {
     return res.status(400).json({ error: 'Missing required fields' });

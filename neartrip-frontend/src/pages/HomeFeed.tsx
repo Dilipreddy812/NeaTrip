@@ -10,7 +10,6 @@ export default function HomeFeed() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>('All');
-  const [isCheckingIn, setIsCheckingIn] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
 
   const { session } = useAuth();
@@ -125,10 +124,9 @@ export default function HomeFeed() {
                     {session && (
                       <button
                         onClick={() => handleCheckInClick(place)}
-                        disabled={isCheckingIn}
-                        className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full transition-colors disabled:bg-gray-400"
+                        className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full transition-colors"
                       >
-                        {isCheckingIn ? 'Checking In...' : 'Check-In'}
+                        Check-In
                       </button>
                     )}
                   </div>

@@ -20,9 +20,7 @@ app.options('*', cors(corsOptions)); // enable pre-flight
 app.use(express.json());
 
 import placesRouter from './routes/places'; // This should be an ExpressRouter instance
-import feedRouter from './routes/feed';
 app.use('/api/places', placesRouter); // Correct usage: app.use(path, router)
-app.use('/api/feed', feedRouter);
 app.get('/', (req, res) => {
   res.send('🛠️ NearTrip API is running!');
 });

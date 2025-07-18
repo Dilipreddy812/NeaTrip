@@ -4,7 +4,19 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 const app = express(); // This is an Application instance
-app.use(cors());
+
+// CORS configuration
+const corsOptions = {
+  origin: [
+    'https://nea-trip.vercel.app',
+    'http://localhost:5173'
+  ],
+  optionsSuccessStatus: 200 // For legacy browser support
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // enable pre-flight
+
 app.use(express.json());
 
 import placesRouter from './routes/places'; // This should be an ExpressRouter instance

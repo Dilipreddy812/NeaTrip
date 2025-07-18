@@ -1,14 +1,20 @@
 // src/pages/HomeFeed.tsx
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
 import type { Place } from '@/types/place';
 
-const API_BASE_URL = 'https://neatrip.onrender.com';
+const API_URL = import.meta.env.VITE_API_URL;
 
 export default function HomeFeed() {
   const [places, setPlaces] = useState<Place[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>('All');
+  const [isCheckingIn, setIsCheckingIn] = useState(false);
+
+  const { session } = useAuth();
+  const navigate = useNavigate();
 
   const categories = ['All', 'Hiking', 'Dining', 'Museums', 'Parks', 'Shopping'];
 
@@ -16,12 +22,53 @@ export default function HomeFeed() {
     ? places.filter(p => p.category?.toLowerCase() === selectedCategory.toLowerCase())
     : places;
 
+  const handleCheckIn = async (placeId: string) => {
+    if (!session) {
+      navigate('/login');
+      return;
+    }
+
+    setIsCheckingIn(true);
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject);
+      });
+
+      const { latitude, longitude } = position.coords;
+
+      const res = await fetch(`${API_URL}/api/checkins`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          place_id: placeId,
+          user_id: session.user.id,
+          latitude,
+          longitude,
+        }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Check-in failed');
+      }
+
+      alert('Checked in successfully!');
+    } catch (error: any) {
+      alert(`Error: ${error.message}`);
+    } finally {
+      setIsCheckingIn(false);
+    }
+  };
+
   useEffect(() => {
     const fetchPlaces = async () => {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`${API_BASE_URL}/api/places`);
+        const res = await fetch(`${API_URL}/api/places`);
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const data = await res.json();
         setPlaces(data);
@@ -43,9 +90,19 @@ export default function HomeFeed() {
     <div className="min-h-screen bg-gray-50 py-4 md:py-8">
       {/* Centered content column with max-width for PC */}
       <div className="max-w-2xl mx-auto px-4"> {/* You can try max-w-xl, max-w-2xl, or max-w-3xl */}
-        <h1 className="text-3xl md:text-4xl font-bold mb-6 md:mb-8 text-center text-gray-800">
-          Nearby Places
-        </h1>
+        <div className="flex justify-between items-center mb-6 md:mb-8">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-800">
+            Nearby Places
+          </h1>
+          {!session && (
+            <button
+              onClick={() => navigate('/login')}
+              className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full transition-colors"
+            >
+              Login to Check-In
+            </button>
+          )}
+        </div>
 
         {/* Category Filter */}
         <div className="flex gap-3 overflow-x-auto mb-6 pb-2">
@@ -86,6 +143,19 @@ export default function HomeFeed() {
                       {place.description}
                     </p>
                   )}
+
+                  {/* Action Buttons */}
+                  <div className="mt-4 pt-4 border-t border-gray-200 flex items-center gap-4">
+                    {session && (
+                       <button
+                        onClick={() => handleCheckIn(place.id)}
+                        disabled={isCheckingIn}
+                        className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full transition-colors disabled:bg-gray-400"
+                      >
+                        {isCheckingIn ? 'Checking In...' : 'Check-In'}
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}

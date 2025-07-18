@@ -16,7 +16,7 @@ router.get('/', async (req, res) => {
       .from('checkins')
       .select(`
         *,
-        profiles:user_id ( username, avatar_url ),
+        users:user_id ( username, avatar_url ),
         places ( name, location_short )
       `)
       .order('created_at', { ascending: false })

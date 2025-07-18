@@ -4,8 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import type { Place } from '@/types/place';
 
-const API_URL = import.meta.env.VITE_API_URL;
-
 export default function HomeFeed() {
   const [places, setPlaces] = useState<Place[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,7 +34,7 @@ export default function HomeFeed() {
 
       const { latitude, longitude } = position.coords;
 
-      const res = await fetch(`${API_URL}/api/checkins`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/checkins`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -68,7 +66,7 @@ export default function HomeFeed() {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`${API_URL}/api/places`);
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/places`);
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const data = await res.json();
         setPlaces(data);

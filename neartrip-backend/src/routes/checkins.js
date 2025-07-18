@@ -18,7 +18,7 @@ function calculateDistanceMeters(lat1, lon1, lat2, lon2) {
 const { protect } = require('../middleware/auth');
 
 router.post('/', protect, async (req, res) => {
-  const { place_id, latitude, longitude, caption, image_url } = req.body;
+  const { place_id, latitude, longitude, caption } = req.body;
   const user_id = req.user.id;
 
   if (!user_id || !place_id || !latitude || !longitude) {
@@ -57,7 +57,6 @@ router.post('/', protect, async (req, res) => {
       user_id,
       place_id,
       caption,
-      image_url,
       checked_in_at: new Date().toISOString(),
     },
   ]);

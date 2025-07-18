@@ -3,14 +3,13 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import type { Place } from '@/types/place';
-import CheckInModal from '@/components/feed/CheckInModal';
 
 export default function HomeFeed() {
   const [places, setPlaces] = useState<Place[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>('All');
-  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
+  const [isCheckingIn, setIsCheckingIn] = useState(false);
 
   const { session } = useAuth();
   const navigate = useNavigate();
@@ -21,21 +20,45 @@ export default function HomeFeed() {
     ? places.filter(p => p.category?.toLowerCase() === selectedCategory.toLowerCase())
     : places;
 
-  const handleCheckInClick = (place: Place) => {
+  const handleCheckIn = async (placeId: string) => {
     if (!session) {
       navigate('/login');
       return;
     }
-    setSelectedPlace(place);
-  };
 
-  const handleCloseModal = () => {
-    setSelectedPlace(null);
-  };
+    setIsCheckingIn(true);
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject);
+      });
 
-  const handleCheckInSuccess = () => {
-    alert('Checked in successfully!');
-    // Optionally, refresh data or update UI
+      const { latitude, longitude } = position.coords;
+
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/checkins`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          place_id: placeId,
+          user_id: session.user.id,
+          latitude,
+          longitude,
+        }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Check-in failed');
+      }
+
+      alert('Checked in successfully!');
+    } catch (error: any) {
+      alert(`Error: ${error.message}`);
+    } finally {
+      setIsCheckingIn(false);
+    }
   };
 
   useEffect(() => {
@@ -122,11 +145,12 @@ export default function HomeFeed() {
                   {/* Action Buttons */}
                   <div className="mt-4 pt-4 border-t border-gray-200 flex items-center gap-4">
                     {session && (
-                      <button
-                        onClick={() => handleCheckInClick(place)}
-                        className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full transition-colors"
+                       <button
+                        onClick={() => handleCheckIn(place.id)}
+                        disabled={isCheckingIn}
+                        className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full transition-colors disabled:bg-gray-400"
                       >
-                        Check-In
+                        {isCheckingIn ? 'Checking In...' : 'Check-In'}
                       </button>
                     )}
                   </div>
@@ -141,13 +165,6 @@ export default function HomeFeed() {
           </div>
         )}
       </div>
-      {selectedPlace && (
-        <CheckInModal
-          place={selectedPlace}
-          onClose={handleCloseModal}
-          onCheckInSuccess={handleCheckInSuccess}
-        />
-      )}
     </div>
   );
 }
